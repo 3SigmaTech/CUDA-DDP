@@ -1,0 +1,133 @@
+Build Solution
+=====
+
+Download components
+-----
+1. Download and install CUDA Toolkit (https://developer.nvidia.com/cuda-toolkit)
+2. Download and install Intel MKL (https://software.intel.com/content/www/us/en/develop/tools/math-kernel-library.html)
+3. Download and install Intel TBB (https://software.seek.intel.com/performance-libraries)
+4. Add C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\redist\intel64_win\tbb\vc_mt to your PATH
+5. Download and unzip (run exe) latest/target version of OpenCV (https://opencv.org/releases/)
+6. Download and unzip OpenCV Contrib (https://github.com/opencv/opencv_contrib/releases)
+   Be sure to download the same release tag and to the same parent folder you unzipped OpenCV into
+
+Build OpenCV
+-----
+1. Navigate to the folder you unzipped OpenCV into and create a new directory "buildfull".
+2. Open Command Prompt and set working directory to buildfull
+3. Run below command (may not be necessary):
+    "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\tbb\bin\tbbvars.bat" intel64
+4. Run below command (this step creates OpenCV.sln):
+    cmake ^
+    -G"Visual Studio 16 2019" ^
+    -D WITH_CUDA=1 ^
+    -D CUDA_ARCH_BIN="6.1;7.5" ^
+    -D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules ^
+    -D CUDA_TOOLKIT_ROOT_DIR="C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.0" ^
+    -D WITH_IPP=1 ^
+    -D BUILD_OPENCV_WORLD=1 ^
+    -D BUILD_opencv_gapi=OFF ^
+    -D BUILD_opencv_alphamat=OFF ^
+    -D BUILD_opencv_ovis=OFF ^
+    -D BUILD_opencv_sfm=OFF ^
+    -D WITH_NVCUVID=OFF ^
+    -D ENABLE_FAST_MATH=0 ^
+    -D CUDA_FAST_MATH=1 ^
+    -D WITH_CUBLAS=1 ^
+    -D WITH_MKL=1 ^
+    -D MKL_USE_MULTITHREAD=1 ^
+    -D MKL_WITH_TBB=1 ^
+    -D WITH_TBB=1 ^
+    -D MKL_ROOT_DIR="C:/Program Files (x86)/IntelSWTools/compilers_and_libraries/windows/mkl" ^
+    -D INSTALL_TESTS=0 ^
+    -D INSTALL_C_EXAMPLES=0 ^
+    -D INSTALL_CREATE_DISTRIB=1 ^
+    -D BUILD_SHARED_LIBS=1 ^
+    -D BUILD_EXAMPLES=0 ^
+    -D WITH_QT=0 ^
+    -D WITH_VTK=0 ^
+    -D WITH_OPENGL=1 ^
+    -D BUILD_PERF_TESTS=0 ^
+    -D BUILD_TESTS=0 ^
+    -D BUILD_DOCS=0 ^
+    -D BUILD_OPENCV_APPS=0 ^
+    -D BUILD_JAVA=0 ^
+    -D BUILD_OPENCV_PYTHON2=0 ^
+    -D BUILD_OPENCV_PYTHON3=0 ^
+    -D OPENCV_SKIP_PYTHON_WARNING=1 ^
+    -D CMAKE_BUILD_TYPE=RELEASE ../sources > buildresults.txt
+5. Notes on the above command:
+    a. -G"Visual Studio 16 2019" depends on your VS version, use -G"Visual Studio 15 2017" if building with VS2017
+    b. CUDA_ARCH_BIN will need to be updated to include 8.6 if/when we upgrade to RTX 3080/3090 cards
+    c. OPENCV_EXTRA_MODULES_PATH will need to be updated to conform to whatever directory you unzipped into in Step 6 of the previous section
+    d. CUDA_TOOLKIT_ROOT_DIR will depend on the version of CUDA you installed in Step 1 of the previous section
+6. Open buildfull/OpenCV.sln with Visual Studio and build it. This will take a while.
+
+Build Errors
+-----
+I ran into the below build error:
+MKL RuntimeLibrary mismatch (https://github.com/opencv/opencv/issues/17870)
+If you do, too, update the linked lib file (in modules/opencv_world project properties)
+    From : mkl_tbb_thread.lib
+    To : mkl_tbb_thread_dll.lib
+
+
+Add Files to Repo
+=====
+
+
+Copy DLLs
+-----
+
+Copy MKL DLL
+    From : C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\redist\intel64_win\mkl
+    To : /3rdParty/dll/Common/
+
+Copy tbb.dll (and PDB file)
+    From : C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\redist\intel64_win\tbb\vc_mt
+    To : /3rdParty/dll/Release
+
+Copy tbb_debug.dll (and PDB file)
+    From : C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\redist\intel64_win\tbb\vc_mt
+    To : /3rdParty/dll/Debug
+
+Copy opencv_world450d.dll (and PDB file)
+    From : /buildfull/bin/Debug/
+    To : /3rdParty/dll/Debug/
+
+Copy opencv_world450.dll (and PDB file)
+    From : /buildfull/bin/Release/
+    To : /3rdParty/dll/Release/
+
+
+Copy Library Files
+-----
+
+Copy opencv_world450d.lib
+    From : /buildfull/lib/Debug/
+    To : /3rdParty/lib/
+Copy opencv_world450.lib
+    From : /buildfull/lib/Release/
+    To : /3rdParty/lib/
+Copy tbb.lib and tbb_debug.lib
+    From : C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\tbb\lib\intel64_win\vc_mt
+    To : /3rdParty/lib/
+    
+    
+Copy Header Files
+-----
+
+Copy OpenCV files
+	From : /build/include/opencv2
+    To : /3rdParty/include/opencv2
+	
+Copy TBB files
+	From : C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\tbb\include\tbb\
+    To : /3rdParty/include/tbb/
+
+
+Update VS Project Files
+-----
+
+Update Linker > Additional Dependencies for Release and Debug of UnitTests, GenerateVideo, and wx projects to point to the new OpenCV version.
+
