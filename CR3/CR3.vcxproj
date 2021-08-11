@@ -55,8 +55,6 @@
     </CudaCompile>
     <CudaLink>
       <PerformDeviceLink>true</PerformDeviceLink>
-      <UseHostLibraryDependencies>false</UseHostLibraryDependencies>
-      <UseHostLibraryDirectories>false</UseHostLibraryDirectories>
       <AdditionalLibraryDirectories />
     </CudaLink>
   </ItemDefinitionGroup>

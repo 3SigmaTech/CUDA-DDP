@@ -55,7 +55,7 @@
       <AdditionalOptions>-dc %(AdditionalOptions)</AdditionalOptions>
     </CudaCompile>
     <CudaLink>
-      <PerformDeviceLink>true</PerformDeviceLink>
+      <PerformDeviceLink>false</PerformDeviceLink>
       <UseHostLibraryDependencies>false</UseHostLibraryDependencies>
       <UseHostLibraryDirectories>false</UseHostLibraryDirectories>
       <AdditionalLibraryDirectories />
